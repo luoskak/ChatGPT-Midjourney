@@ -7,6 +7,7 @@ import { ALL_MODELS } from "./config";
 
 export interface AccessControlStore {
   accessCode: string;
+  accessToken: string;
   token: string;
 
   needCode: boolean;
@@ -17,6 +18,7 @@ export interface AccessControlStore {
 
   updateToken: (_: string) => void;
   updateCode: (_: string) => void;
+  updateAccessToken: (_: string) => void;
   updateMidjourneyProxyUrl: (_: string) => void;
   enabledAccessControl: () => boolean;
   isAuthorized: () => boolean;
@@ -29,6 +31,7 @@ export const useAccessStore = create<AccessControlStore>()(
   persist(
     (set, get) => ({
       token: "",
+      accessToken: "",
       accessCode: "",
       needCode: true,
       hideUserApiKey: false,
@@ -43,6 +46,9 @@ export const useAccessStore = create<AccessControlStore>()(
       },
       updateCode(code: string) {
         set(() => ({ accessCode: code }));
+      },
+      updateAccessToken(token: string) {
+        set(() => ({ accessToken: token }));
       },
       updateToken(token: string) {
         set(() => ({ token }));

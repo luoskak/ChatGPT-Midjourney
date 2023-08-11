@@ -3,6 +3,7 @@ import { getServerSideConfig } from "../config/server";
 import md5 from "spark-md5";
 import { ACCESS_CODE_PREFIX } from "../constant";
 import { OPENAI_URL } from "./common";
+import * as jose from "jose";
 
 function getIP(req: NextRequest) {
   let ip = req.ip ?? req.headers.get("x-real-ip");
@@ -25,8 +26,11 @@ function parseApiKey(bearToken: string) {
   };
 }
 
-export function auth(req: NextRequest,skipCustomKey=true) {
-  const authToken = req.headers.get("Authorization") ?? req.nextUrl.searchParams.get("Authorization") ?? "";
+export async function auth(req: NextRequest, skipCustomKey = true) {
+  const authToken =
+    req.headers.get("Authorization") ??
+    req.nextUrl.searchParams.get("Authorization") ??
+    "";
 
   // check if it is openai api key or user token
   const { accessCode, apiKey: token } = parseApiKey(authToken);
@@ -41,25 +45,42 @@ export function auth(req: NextRequest,skipCustomKey=true) {
   console.log("[Time] ", new Date().toLocaleString());
 
   if (serverConfig.needCode && !serverConfig.codes.has(hashedCode)) {
-    if(!token || !skipCustomKey){
+    if (!token || !skipCustomKey) {
       return {
         error: true,
         msg: !accessCode ? "empty access code" : "wrong access code",
       };
     }
   }
+  // only allow access code
+  if (token === "") {
+    return {
+      error: true,
+      msg: "需要登录",
+    };
+  }
 
-  // if user does not provide an api key, inject system api key
-  if (!token) {
-    const apiKey = serverConfig.apiKey;
-    if (apiKey) {
-      console.log("[Auth] use system api key");
-      req.headers.set("Authorization", `Bearer ${apiKey}`);
-    } else {
-      console.log("[Auth] admin did not provide an api key");
-    }
+  const JWKS = jose.createRemoteJWKSet(
+    new URL("http://127.0.0.1:8001/oauth2/certs"),
+  );
+  try {
+    const { payload, protectedHeader } = await jose.jwtVerify(token, JWKS);
+    console.log(protectedHeader);
+    console.log(payload);
+  } catch (e) {
+    console.log("[Auth] err " + e + " at" + token);
+    return {
+      error: true,
+      msg: "请尝试刷新页面",
+    };
+  }
+
+  const apiKey = serverConfig.apiKey;
+  if (apiKey) {
+    console.log("[Auth] use system api key");
+    req.headers.set("Authorization", `Bearer ${apiKey}`);
   } else {
-    console.log("[Auth] use user api key");
+    console.log("[Auth] admin did not provide an api key");
   }
 
   return {

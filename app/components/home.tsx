@@ -24,6 +24,7 @@ import {
 import { SideBar } from "./sidebar";
 import { useAppConfig } from "../store/config";
 import { AuthPage } from "./auth";
+import { useAccessStore } from "../store";
 
 export function Loading(props: { noLogo?: boolean }) {
   return (
@@ -91,6 +92,19 @@ const useHasHydrated = () => {
   return hasHydrated;
 };
 
+const useAccessToken = () => {
+  const access = useAccessStore();
+
+  useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    const accessToken = new URLSearchParams(hash).get("access_token");
+    if (accessToken) {
+      access.updateAccessToken(accessToken);
+    }
+    console.log(new URLSearchParams(hash).toString());
+  }, []);
+};
+
 const loadAsyncGoogleFont = () => {
   const linkEl = document.createElement("link");
   linkEl.rel = "stylesheet";
@@ -146,6 +160,7 @@ function Screen() {
 
 export function Home() {
   useSwitchTheme();
+  useAccessToken();
 
   if (!useHasHydrated()) {
     return <Loading />;
