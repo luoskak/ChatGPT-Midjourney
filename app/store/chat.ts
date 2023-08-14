@@ -16,9 +16,6 @@ import {
 } from "../client/api";
 import { ChatControllerPool } from "../client/controller";
 import { prettyObject } from "../utils/format";
-import { getServerSideConfig } from "../config/server";
-
-const serverConfig = getServerSideConfig();
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -256,7 +253,7 @@ export const useChatStore = create<ChatStore>()(
         ChatFetchTaskPool[taskId] = setTimeout(async () => {
           ChatFetchTaskPool[taskId] = null;
           const statusRes = await fetch(
-            `${serverConfig.basePath}/api/midjourney/mj/task/${taskId}/fetch`,
+            `/api/midjourney/mj/task/${taskId}/fetch`,
             {
               method: "GET",
               headers: getHeaders(),
@@ -456,14 +453,11 @@ export const useChatStore = create<ChatStore>()(
             try {
               let res = null;
               const reqFn = (path: string, method: string, body?: any) => {
-                return fetch(
-                  serverConfig.basePath + "/api/midjourney/mj/" + path,
-                  {
-                    method: method,
-                    headers: getHeaders(),
-                    body: body,
-                  },
-                );
+                return fetch("/api/midjourney/mj/" + path, {
+                  method: method,
+                  headers: getHeaders(),
+                  body: body,
+                });
               };
               switch (action) {
                 case "IMAGINE": {

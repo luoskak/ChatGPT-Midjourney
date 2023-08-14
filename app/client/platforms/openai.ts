@@ -19,7 +19,7 @@ export class ChatGPTApi implements LLMApi {
     if (openaiUrl.endsWith("/")) {
       openaiUrl = openaiUrl.slice(0, openaiUrl.length - 1);
     }
-    return [openaiUrl, "chatgpt_midjourney", path].join("/");
+    return ["chatgpt_midjourney", openaiUrl, path].join("/");
   }
 
   extractMessage(res: any) {
