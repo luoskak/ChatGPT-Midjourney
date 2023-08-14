@@ -70,7 +70,7 @@ export const useAccessStore = create<AccessControlStore>()(
       fetch() {
         if (fetchState > 0) return;
         fetchState = 1;
-        fetch(serverConfig.basePath + "/api/config", {
+        fetch("/api/config", {
           method: "post",
           body: null,
           headers: {

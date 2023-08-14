@@ -101,7 +101,6 @@ const useAccessToken = () => {
     if (accessToken) {
       access.updateAccessToken(accessToken);
     }
-    console.log(new URLSearchParams(hash).toString());
   }, []);
 };
 
