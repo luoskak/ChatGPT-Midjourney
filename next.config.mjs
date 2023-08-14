@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
+  basePath: '/chatgpt-midjourney',
+  assetPrefix: '/chatgpt-midjourney',
   async rewrites() {
     const ret = [
       {

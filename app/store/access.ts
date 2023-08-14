@@ -4,6 +4,9 @@ import { StoreKey } from "../constant";
 import { getHeaders } from "../client/api";
 import { BOT_HELLO } from "./chat";
 import { ALL_MODELS } from "./config";
+import { getServerSideConfig } from "../config/server";
+
+const serverConfig = getServerSideConfig();
 
 export interface AccessControlStore {
   accessCode: string;
@@ -35,7 +38,7 @@ export const useAccessStore = create<AccessControlStore>()(
       accessCode: "",
       needCode: true,
       hideUserApiKey: false,
-      openaiUrl: "/api/openai/",
+      openaiUrl: serverConfig.basePath + "/api/openai/",
       midjourneyProxyUrl: "",
       useMjImgSelfProxy: true,
 
@@ -67,7 +70,7 @@ export const useAccessStore = create<AccessControlStore>()(
       fetch() {
         if (fetchState > 0) return;
         fetchState = 1;
-        fetch("/api/config", {
+        fetch(serverConfig.basePath + "/api/config", {
           method: "post",
           body: null,
           headers: {
